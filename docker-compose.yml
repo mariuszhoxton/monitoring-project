@@ -1,26 +1,34 @@
----
-- name: "Deploy Monitoring (Netdata)"
-  hosts: ubuntu_server
-  vars:
-    # Gdzie na Ubuntu ma wylądować projekt
-    project_path: "/home/{{ ansible_user }}/projects/monitoring"
-    # Adres Twojego nowego repozytorium
-    repo_url: "git@github.com:mariuszhoxton/monitoring-project.git"
+version: '3.8'
 
-  tasks:
-    - name: "1. Tworzenie folderu projektu na Ubuntu"
-      file:
-        path: "{{ project_path }}"
-        state: directory
+services:
+  netdata:
+    image: netdata/netdata:latest
+    container_name: netdata
+    restart: always
+    ports:
+      - "19999:19999"
+    cap_add:
+      - SYS_PTRACE
+    security_opt:
+      - apparmor:unconfined
+    volumes:
+      - netdataconfig:/etc/netdata
+      - netdatalib:/var/lib/netdata
+      - netdatacache:/var/cache/netdata
+      - /etc/passwd:/host/etc/passwd:ro
+      - /etc/group:/host/etc/group:ro
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /etc/os-release:/host/etc/os-release:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      - frontend_public
 
-    - name: "2. Pobieranie kodu monitoringu z GitHuba na Ubuntu"
-      git:
-        repo: "{{ repo_url }}"
-        dest: "{{ project_path }}"
-        version: main
-        force: yes
+networks:
+  frontend_public:
+    external: true # Mówimy Dockerowi: "Ta sieć już istnieje, po prostu się do niej podepnij"
 
-    - name: "3. Uruchomienie Netdata przez Docker Compose"
-      community.docker.docker_compose_v2:
-        project_src: "{{ project_path }}"
-        state: present
+volumes:
+  netdataconfig:
+  netdatalib:
+  netdatacache:
