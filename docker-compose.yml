@@ -22,13 +22,15 @@ services:
       - /etc/os-release:/host/etc/os-release:ro
       - /var/run/docker.sock:/var/run/docker.sock:ro
     networks:
-      - frontend_public
+      - global_monitoring_net
 
 networks:
-  frontend_public:
-    external: true # Mówimy Dockerowi: "Ta sieć już istnieje, po prostu się do niej podepnij"
+  global_monitoring_net:
+    external: true
+    name: global_monitoring_net
 
 volumes:
   netdataconfig:
   netdatalib:
   netdatacache:
+
