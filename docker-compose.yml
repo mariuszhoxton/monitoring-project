@@ -5,6 +5,8 @@ services:
     restart: always
     ports:
       - "19999:19999"
+    environment:
+      - PGID=998 # numer, który wyszedł z komendy grep docker /etc/group
     cap_add:
       - SYS_PTRACE
     security_opt:
